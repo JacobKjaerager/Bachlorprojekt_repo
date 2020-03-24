@@ -1,15 +1,8 @@
 # LoRa Weather Server
-#
-# Author: Shawn Hymel
-# Date: March 23, 2019
-#
-# Receives and display temperature, humidity, and pressure data from raw LoRa 
-# radio. Run with lora-weather-client.ino on Arduino.
-#
+#  Run with lora-weather-client.ino on Arduino.
 # Required packages:
 #  pip install adafruit-circuitpython-rfm9x
-#
-# License: Beerware
+
 
 import time
 import busio
