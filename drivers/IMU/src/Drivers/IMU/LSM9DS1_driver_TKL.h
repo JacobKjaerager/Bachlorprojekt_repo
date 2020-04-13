@@ -27,23 +27,24 @@ class LSM9DS1Class {
     int begin();
     void end();
 
+    void calibrate(bool autoCalc = true);
+    void enableFIFO(bool enable);
+    void setFIFO(fifoMode_type fifoMode, uint8_t fifoThs);
+
     // Controls whether a FIFO is continuously filled, or a single reading is stored.
     // Defaults to one-shot.
     void setContinuousMode();
     void setOneShotMode();
 
     // Accelerometer
-    virtual int readAcceleration(float& aX, float& aY, float& aZ); // Results are in G (earth gravity).
     virtual int accelerationAvailable(); // Number of samples in the FIFO.
     virtual float accelerationSampleRate(); // Sampling rate of the sensor.
 
     // Gyroscope
-    virtual int readGyroscope(float& gX, float& gY, float& gZ); // Results are in degrees/second.
     virtual int gyroscopeAvailable(); // Number of samples in the FIFO.
     virtual float gyroscopeSampleRate(); // Sampling rate of the sensor.
 
     // Magnetometer
-    virtual int readMagneticField(float& mX, float& mY, float& mZ); // Results are in uT (micro Tesla).
     virtual int magneticFieldAvailable(); // Number of samples in the FIFO.
     virtual float magneticFieldSampleRate(); // Sampling rate of the sensor.
 /*****************************************************/
@@ -85,7 +86,7 @@ class LSM9DS1Class {
     // init() -- Sets up gyro, accel, and mag settings to default. To set com interface and/or addresses see begin().
     void init();
     // _autoCalc keeps track of whether we're automatically subtracting off. accelerometer and gyroscope bias calculated in calibrate().
-    bool _autoCalc;
+    // bool _autoCalc;
     // Values for storing current resolution for the sensors. Units of these values would be DPS (or g's or Gs's) per ADC tick. This value is calculated as (sensor scale) / (2^15).
     float gRes, aRes, mRes;
     // calcgRes() -- Calculate the resolution of the gyroscope. This function will set the value of the gRes variable. gScale must be set prior to calling this function.
@@ -114,6 +115,11 @@ class LSM9DS1Class {
 	//	- CTRL_REG7_XM = 0x00: Continuous conversion mode. Normal HPF mode.
 	//	- INT_CTRL_REG_M = 0x09: Interrupt active-high. Enable interrupts.
 	void initMag();
+
+
+
+
+
 };
 
 extern LSM9DS1Class IMU;

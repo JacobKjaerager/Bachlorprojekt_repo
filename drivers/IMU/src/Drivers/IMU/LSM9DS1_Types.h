@@ -216,6 +216,8 @@ struct accelSettings
 	int8_t bandwidth;
 	uint8_t highResEnable;
 	uint8_t highResBandwidth;
+	bool _autoCalc;
+
 };
 
 struct magSettings

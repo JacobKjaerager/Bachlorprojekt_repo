@@ -3,6 +3,9 @@
 #include "LSM9DS1_driver_TKL.h"
 #include "LSM9DS1_Types.h"
 
+#include <Arduino.h>
+
+
 #define LSM9DS1_ADDRESS            0x6b
 
 #define LSM9DS1_WHO_AM_I           0x0f
@@ -128,7 +131,8 @@ void LSM9DS1Class::init(){
     mBiasRaw[i] = 0;
   }
 
-  _autoCalc = false;
+  settings.accel._autoCalc = true;
+
 }
 
 
@@ -195,24 +199,7 @@ void LSM9DS1Class::end()
   _wire->end();
 }
 
-int LSM9DS1Class::readAcceleration(float& x, float& y, float& z)
-{
-  int16_t data[3];
 
-  if (!readRegisters(LSM9DS1_ADDRESS, LSM9DS1_OUT_X_XL, (uint8_t*)data, sizeof(data))) {
-    x = NAN;
-    y = NAN;
-    z = NAN;
-
-    return 0;
-  }
-
-  x = data[0] * 4.0 / 32768.0;
-  y = data[1] * 4.0 / 32768.0;
-  z = data[2] * 4.0 / 32768.0;
-
-  return 1;
-}
 
 int LSM9DS1Class::accelerationAvailable()
 {
@@ -235,24 +222,7 @@ float LSM9DS1Class::accelerationSampleRate()
   return settings.accel.sampleRate;
 }
 
-int LSM9DS1Class::readGyroscope(float& x, float& y, float& z)
-{
-  int16_t data[3];
 
-  if (!readRegisters(LSM9DS1_ADDRESS, LSM9DS1_OUT_X_G, (uint8_t*)data, sizeof(data))) {
-    x = NAN;
-    y = NAN;
-    z = NAN;
-
-    return 0;
-  }
-
-  x = data[0] * 2000.0 / 32768.0;
-  y = data[1] * 2000.0 / 32768.0;
-  z = data[2] * 2000.0 / 32768.0;
-
-  return 1;
-}
 
 int LSM9DS1Class::gyroscopeAvailable()
 {
@@ -268,24 +238,7 @@ float LSM9DS1Class::gyroscopeSampleRate()
   return settings.gyro.sampleRate;
 }
 
-int LSM9DS1Class::readMagneticField(float& x, float& y, float& z)
-{
-  int16_t data[3];
 
-  if (!readRegisters(LSM9DS1_ADDRESS_M, LSM9DS1_OUT_X_L_M, (uint8_t*)data, sizeof(data))) {
-    x = NAN;
-    y = NAN;
-    z = NAN;
-
-    return 0;
-  }
-
-  x = data[0] * 4.0 * 100.0 / 32768.0;
-  y = data[1] * 4.0 * 100.0 / 32768.0;
-  z = data[2] * 4.0 * 100.0 / 32768.0;
-
-  return 1;
-}
 
 int LSM9DS1Class::magneticFieldAvailable()
 {
@@ -514,13 +467,15 @@ void LSM9DS1Class::initMag(){
 
 void LSM9DS1Class::readAccel(){
 
+
 	uint8_t temp[6];
 	if ( readRegisters(LSM9DS1_ADDRESS, OUT_X_L_XL, temp, 6) /* == 6 */ )
 	{
+
 		ax = (temp[1] << 8) | temp[0];
 		ay = (temp[3] << 8) | temp[2];
 		az = (temp[5] << 8) | temp[4];
-		if (_autoCalc)
+		if (settings.accel._autoCalc)
 		{
 			ax -= aBiasRaw[X_AXIS];
 			ay -= aBiasRaw[Y_AXIS];
@@ -555,7 +510,7 @@ void LSM9DS1Class::readGyro(){
 		gx = (temp[1] << 8) | temp[0];
 		gy = (temp[3] << 8) | temp[2];
 		gz = (temp[5] << 8) | temp[4];
-		if (_autoCalc)
+		if (settings.accel._autoCalc)
 		{
 			gx -= gBiasRaw[X_AXIS];
 			gy -= gBiasRaw[Y_AXIS];
@@ -577,6 +532,97 @@ float LSM9DS1Class::calcAccel(int16_t accel){
 float LSM9DS1Class::calcMag(int16_t mag){
 
 	return mRes * mag;
+}
+
+void LSM9DS1Class::enableFIFO(bool enable)
+{
+	// uint8_t temp = readRegister(LSM9DS1_ADDRESS, CTRL_REG9);
+	// if (enable) temp |= (1<<1);
+	// else temp &= ~(1<<1);
+	// writeRegister(LSM9DS1_ADDRESS, CTRL_REG9, temp);
+
+	// uint8_t temp = readRegister(LSM9DS1_ADDRESS, CTRL_REG9);
+	// if (enable){
+	// 	temp = 0x02;
+	// }
+	// else {
+	// 	temp = 0x00;
+	// }
+	// writeRegister(LSM9DS1_ADDRESS, CTRL_REG9, temp);
+
+	writeRegister(LSM9DS1_ADDRESS, 0x23, 0x02);
+	writeRegister(LSM9DS1_ADDRESS, 0x2E, 0xC0);
+
+
+}
+
+void LSM9DS1Class::setFIFO(fifoMode_type fifoMode, uint8_t fifoThs)
+{
+	// Limit threshold - 0x1F (31) is the maximum. If more than that was asked
+	// limit it to the maximum.
+	uint8_t threshold = fifoThs <= 0x1F ? fifoThs : 0x1F;
+	writeRegister(LSM9DS1_ADDRESS, FIFO_CTRL, ((fifoMode & 0x7) << 5) | (threshold & 0x1F));
+}
+
+
+void LSM9DS1Class::calibrate(bool autoCalc)
+{
+	Serial.println("In Calibrate() now");
+
+	Serial.printf("ax bias before:\t%d\n", aBiasRaw[0] );
+  Serial.printf("ay bias before:\t%d\n", aBiasRaw[1] );
+  Serial.printf("az bias before:\t%d\n", aBiasRaw[2] );
+
+	uint8_t samples = 0;
+	int ii;
+	int32_t aBiasRawTemp[3] = {0, 0, 0};
+	int32_t gBiasRawTemp[3] = {0, 0, 0};
+
+	// Turn on FIFO and set threshold to 32 samples
+	enableFIFO(true);
+	setFIFO(FIFO_THS, 0x1F);
+	Serial.println("Reading samples");
+	while (samples < 0x1F)
+	{
+
+		samples = (readRegister(LSM9DS1_ADDRESS, (FIFO_SRC) & 0x3F));// Read number of stored samples
+		// samples = (readRegister(LSM9DS1_ADDRESS, (0x2F) & 0x3F));// Read number of stored samples
+	}
+	Serial.println("Reading samples DONE");
+	for(ii = 0; ii < samples ; ii++)
+	{	// Read the gyro data stored in the FIFO
+		// Serial.println("Reading Gyro");
+		readGyro();
+		// Serial.println("adding Gyro data to array ");
+		gBiasRawTemp[0] += gx;
+		gBiasRawTemp[1] += gy;
+		gBiasRawTemp[2] += gz;
+		// Serial.println("Reading Acc");
+		readAccel();
+		// Serial.println("adding Acc data to array ");
+		aBiasRawTemp[0] += ax;
+		aBiasRawTemp[1] += ay;
+		aBiasRawTemp[2] += az - (int16_t)(1./aRes); // Assumes sensor facing up - meaning Z- axis is perpendicular to the ground
+	}
+	for (ii = 0; ii < 3; ii++)
+	{
+		gBiasRaw[ii] = gBiasRawTemp[ii] / samples;
+		gBias[ii] = calcGyro(gBiasRaw[ii]);
+		aBiasRaw[ii] = aBiasRawTemp[ii] / samples;
+		aBias[ii] = calcAccel(aBiasRaw[ii]);
+	}
+
+	enableFIFO(false);
+	setFIFO(FIFO_OFF, 0x00);
+
+	// if (autoCalc) _autoCalc = true;
+	if (autoCalc) settings.accel._autoCalc = true;
+
+ Serial.printf("ax bias after:\t%d\n", aBiasRaw[0] );
+ Serial.printf("ay bias after:\t%d\n", aBiasRaw[1] );
+ Serial.printf("az bias after:\t%d\n", aBiasRaw[2] );
+
+
 }
 
 

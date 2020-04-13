@@ -80,69 +80,18 @@ void setup() {
     while (1);
   }
 
-  Serial.print("Accelerometer sample rate = ");
-  Serial.print(IMU.accelerationSampleRate());
-  Serial.println(" Hz");
+  Serial.println("-------");
+  for (size_t i = 0; i < 700; i++) {
+    PrintTest();
 
-  Serial.print("Gyroscope sample rate = ");
-  Serial.print(IMU.gyroscopeSampleRate());
-  Serial.println(" Hz");
+  }
 
-  Serial.print("Magnetometer sample rate = ");
-  Serial.print(IMU.magneticFieldSampleRate());
-  Serial.println(" Hz");
-
-  Serial.println();
-  Serial.println("Acceleration in G's");
-  Serial.println("X\tY\tZ");
 }
 
 void loop() {
-  // Update the sensor values whenever new data is available
-  if ( IMU.gyroscopeAvailable() )
-  {
-    // To read from the gyroscope,  first call the
-    // readGyro() function. When it exits, it'll update the
-    // gx, gy, and gz variables with the most current data.
-    IMU.readGyro();
-  }
-  if ( IMU.accelerationAvailable() )
-  {
-    // To read from the accelerometer, first call the
-    // readAccel() function. When it exits, it'll update the
-    // ax, ay, and az variables with the most current data.
-    IMU.readAccel();
-  }
-  if ( IMU.magneticFieldAvailable() )
-  {
-    // To read from the magnetometer, first call the
-    // readMag() function. When it exits, it'll update the
-    // mx, my, and mz variables with the most current data.
-    IMU.readMag();
-  }
 
-  // To read from the magnetometer, first call the
-  // readMag() function. When it exits, it'll update the
-  // mx, my, and mz variables with the most current data.
-  IMU.readTemp();
+  // PrintTest();
 
-
-  if ((lastPrint + PRINT_SPEED) < millis())
-  {
-    printGyro();  // Print "G: gx, gy, gz"
-    printAccel(); // Print "A: ax, ay, az"
-    printMag();   // Print "M: mx, my, mz"
-    // printTemp();  // Print temoerature
-    // Print the heading and orientation for fun!
-    // Call print attitude. The LSM9DS1's mag x and y
-    // axes are opposite to the accelerometer, so my, mx are
-    // substituted for each other.
-    printAttitude(IMU.ax, IMU.ay, IMU.az,
-                  -IMU.my, -IMU.mx, IMU.mz);
-    Serial.println();
-
-    lastPrint = millis(); // Update lastPrint time
-  }
 }
 
 

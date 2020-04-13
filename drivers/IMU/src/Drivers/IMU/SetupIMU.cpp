@@ -79,6 +79,8 @@ void SetupIMUDefaults() {
   SetupACC(true,2,1,-1);
   SetupGyro(true,2000,3,-1,false);
   SetupMag(true,1,8,true,false);
+
+  // IMU.calibrate(true);
 }
 
 
@@ -90,6 +92,9 @@ void StartIMU() {
     Serial.println("Failed to initialize IMU!");
     while (1);
   }
+  Serial.println("Calibrating... ");
+  IMU.calibrate(true);
+  Serial.println("Calibration done!");
 
   Serial.print("Accelerometer sample rate = ");
   Serial.print(IMU.accelerationSampleRate());
@@ -115,6 +120,8 @@ void PrintTest() {
     // readGyro() function. When it exits, it'll update the
     // gx, gy, and gz variables with the most current data.
     IMU.readGyro();
+
+
   }
 
   if ( IMU.accelerationAvailable() ){
@@ -160,6 +167,7 @@ void printTemp(){
 }
 
 void printGyro(){
+  Serial.printf("Autocalc status = %d\n", IMU.settings.accel._autoCalc );
   Serial.print("G: ");
 #ifdef PRINT_CALCULATED
   Serial.print(IMU.calcGyro(IMU.gx), 2);
