@@ -81,7 +81,7 @@ void setup() {
   }
 
   Serial.println("-------");
-  for (size_t i = 0; i < 700; i++) {
+  for (size_t i = 0; i < 600; i++) {
     PrintTest();
 
   }

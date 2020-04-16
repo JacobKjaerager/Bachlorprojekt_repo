@@ -38,7 +38,22 @@ bool IsInFreeFall(){
 
 
 
-
+/**
+ * \brief Sets up the Accelerometer for reading the data from it in the wanted rate etc.
+ *
+ * \param enableAcc   - Boolean, used to enable or disable the accelerometer. Used for all axes
+ * \param scale       - sets the full-scale range of the accelerometer.
+                        Accelerometer scale can be 2, 4, 8, or 16
+ * \param samplerate  - sets the output data rate (ODR) of the accelerometer.
+                        ONLY APPLICABLE WHEN THE GYROSCOPE IS DISABLED!
+                        Otherwise accel sample rate = gyro sample rate.
+                        Accelerometer sample rate can be 1-6
+ * \param bandwidth   - Sets the anti-aliasing filter bandwidth.
+                        Accelerometer cutoff freqeuncy can be any value between -1 - 3.
+                        -1 = bandwidth determined by sample rate
+ *
+ * \return void
+ */
 void SetupACC(bool enableAcc, uint8_t scale, uint8_t sampleRate, uint8_t bandwidth ){
   IMU.settings.accel.enabled = enableAcc;
   IMU.settings.accel.enableX = enableAcc;
