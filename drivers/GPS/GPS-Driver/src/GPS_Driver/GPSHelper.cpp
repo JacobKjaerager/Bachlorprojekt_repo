@@ -2,14 +2,14 @@
 
 /*! \brief This is a helper "class" to make the usage of the TinyGPS++ library.
  *
- *			Description here
+ *			This is a helper "class" to make the usage of the TinyGPS++ library.
  *
  *
  *
- *	Filename:	GPSHelper.cpp
- *	Path:		./GPS_Driver/
- *	Created:	12-04-2020 10:56:48
- *	Author:		Tonni Lutze
+ *	Filename:	GPSHelper.cpp                                                      \n
+ *	Path:		./GPS_Driver/                                                        \n
+ *	Created:	12-04-2020 10:56:48                                                \n
+ *	Author:		Tonni Lutze                                                         \n
  *
  *	Major change #1:
  */
