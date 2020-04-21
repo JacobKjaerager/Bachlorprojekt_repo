@@ -9,7 +9,7 @@
 
 #define PRINT_CALCULATED
 // #define PRINT_RAW
-#define PRINT_SPEED 250
+#define PRINT_SPEED 1//250
 #define DECLINATION -3.45 // Declination (degrees) in Aarhus
 
 static unsigned long lastPrint = 0;
@@ -108,7 +108,7 @@ void StartIMU() {
     while (1);
   }
   Serial.println("Calibrating... ");
-  IMU.calibrate(true);
+  // IMU.calibrate(true);
   Serial.println("Calibration done!");
 
   Serial.print("Accelerometer sample rate = ");
@@ -127,8 +127,9 @@ void StartIMU() {
   Serial.println("Acceleration in G's");
   Serial.println("X\tY\tZ");
 }
-
+int counter = 0;
 void PrintTest() {
+
   // Update the sensor values whenever new data is available
   if ( IMU.gyroscopeAvailable() ){
     // To read from the gyroscope,  first call the
@@ -159,19 +160,22 @@ void PrintTest() {
   IMU.readTemp();
 
   if ((lastPrint + PRINT_SPEED) < millis()){
-    printGyro();  // Print "G: gx, gy, gz"
-    printAccel(); // Print "A: ax, ay, az"
-    printMag();   // Print "M: mx, my, mz"
-
-
-    // Print the heading and orientation for fun!
-    // Call print attitude. The LSM9DS1's mag x and y
-    // axes are opposite to the accelerometer, so my, mx are
-    // substituted for each other.
-    printAttitude(IMU.ax, IMU.ay, IMU.az,
-                  -IMU.my, -IMU.mx, IMU.mz);
-    Serial.println();
-    lastPrint = millis();
+    Serial.print("Counter: ");
+    Serial.println(counter);
+    counter++;
+    // printGyro();  // Print "G: gx, gy, gz"
+    // printAccel(); // Print "A: ax, ay, az"
+    // printMag();   // Print "M: mx, my, mz"
+    //
+    //
+    // // Print the heading and orientation for fun!
+    // // Call print attitude. The LSM9DS1's mag x and y
+    // // axes are opposite to the accelerometer, so my, mx are
+    // // substituted for each other.
+    // printAttitude(IMU.ax, IMU.ay, IMU.az,
+    //               -IMU.my, -IMU.mx, IMU.mz);
+    // Serial.println();
+    // lastPrint = millis();
   }
 }
 

@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
-#include "WProgram.h"
+// #include "WProgram.h"
 #endif
 #include <limits.h>
 
@@ -39,6 +39,39 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _GPS_KM_PER_METER 0.001
 #define _GPS_FEET_PER_METER 3.2808399
 #define _GPS_MAX_FIELD_SIZE 15
+
+
+
+/***************************************************************************/
+/*************************  ADDED by ToKeLu  *******************************/
+/***************************************************************************/
+struct DetailedSateliteData{
+  friend class TinyGPSPlus;
+public:
+  bool isValid()    const {return valid;}
+  bool isUpdated()  const {return updated;}
+  uint16_t Elevation();
+  uint16_t Azimuth();
+
+  DetailedSateliteData() : valid(false), updated(false) {}
+
+private:
+  bool valid, updated;
+  uint16_t elevation, newElevation;
+  uint16_t azimuth, newAzimuth;
+  uint32_t lastCommitTime;
+
+  void commit();
+  void setElevation(const char *term);
+  void setAzimuth(const char *term);
+
+
+};
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 struct RawDegrees
 {
@@ -231,6 +264,7 @@ public:
   TinyGPSAltitude altitude;
   TinyGPSInteger satellites;
   TinyGPSHDOP hdop;
+  DetailedSateliteData details;
 
   static const char *libraryVersion() { return _GPS_VERSION; }
 
@@ -247,7 +281,7 @@ public:
   uint32_t passedChecksum()   const { return passedChecksumCount; }
 
 private:
-  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
+  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_GPGSV, GPS_SENTENCE_OTHER};
 
   // parsing state variables
   uint8_t parity;

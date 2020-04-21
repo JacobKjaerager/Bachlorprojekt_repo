@@ -86,11 +86,17 @@ void setup() {
 
   }
 
+  SetupGyro(false, 0, 0, 0, false);
+  SetupMag(false, 0, 0, false, false);
+  SetupACC(true,2,5,-1);
+
+  // SetupACC(bool enableAcc, uint8_t scale, uint8_t sampleRate, uint8_t bandwidth )
+
 }
 
 void loop() {
 
-  // PrintTest();
+  PrintTest();
 
 }
 
