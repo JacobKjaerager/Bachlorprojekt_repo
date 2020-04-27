@@ -5,18 +5,18 @@
 
 
 //
-#define LSM9DS1_ADDRESS            0x6b
-#define LSM9DS1_CTRL_REG6_XL       0x20
-#define LSM9DS1_CTRL_REG1_G        0x10
-#define LSM9DS1_CTRL_REG8          0x22
-#define LSM9DS1_WHO_AM_I           0x0f
-#define LSM9DS1_STATUS_REG         0x17
+#define LSM9DS1_ADDRESS            0x6b							/**<	Physical address of the IMU IC	*/
+#define LSM9DS1_CTRL_REG6_XL       0x20							/**<	Accelerometer control register	*/
+#define LSM9DS1_CTRL_REG1_G        0x10							/**<	Gyroscope control register	*/
+#define LSM9DS1_CTRL_REG8          0x22							/**<	Control register	*/
+#define LSM9DS1_WHO_AM_I           0x0f							/**<	Address register	*/
+#define LSM9DS1_STATUS_REG         0x17							/**<	Gyroscope and Accelerometer Status register	*/
 //
 // magnetometer
-#define LSM9DS1_ADDRESS_M          0x1e
-#define LSM9DS1_CTRL_REG2_M        0x21
-#define LSM9DS1_CTRL_REG3_M        0x22
-#define LSM9DS1_STATUS_REG_M       0x27
+#define LSM9DS1_ADDRESS_M          0x1e							/**<	Magnetometer address*/
+#define LSM9DS1_CTRL_REG2_M        0x21							/**<	Magnetometer control register*/
+#define LSM9DS1_CTRL_REG3_M        0x22							/**<	Magnetometer control register*/
+#define LSM9DS1_STATUS_REG_M       0x27							/**<	Magnetometer status register*/
 
 
 
@@ -27,103 +27,79 @@
 // #define LSM9DS1_CTRL_REG1_M        0x20
 // #define LSM9DS1_OUT_X_L_M          0x28
 
-// #define SENSITIVITY_ACCELEROMETER_2   0.000061
-// #define SENSITIVITY_ACCELEROMETER_4   0.000122
-// #define SENSITIVITY_ACCELEROMETER_8   0.000244
-// #define SENSITIVITY_ACCELEROMETER_16  0.000732
-// #define SENSITIVITY_GYROSCOPE_245     0.008750
-// #define SENSITIVITY_GYROSCOPE_500     0.017500
-// #define SENSITIVITY_GYROSCOPE_2000    0.070000
-// #define SENSITIVITY_MAGNETOMETER_4    0.000014
-// #define SENSITIVITY_MAGNETOMETER_8    0.000029
-// #define SENSITIVITY_MAGNETOMETER_12   0.000043
-// #define SENSITIVITY_MAGNETOMETER_16   0.000058
+#define SENSITIVITY_ACCELEROMETER_2   0.000061			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_ACCELEROMETER_4   0.000122			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_ACCELEROMETER_8   0.000244			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_ACCELEROMETER_16  0.000732			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_GYROSCOPE_245     0.008750			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_GYROSCOPE_500     0.017500			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_GYROSCOPE_2000    0.070000			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_MAGNETOMETER_4    0.000014			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_MAGNETOMETER_8    0.000029			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_MAGNETOMETER_12   0.000043			/**<	used in calculations. Sensitivity factors	*/
+#define SENSITIVITY_MAGNETOMETER_16   0.000058			/**<	used in calculations. Sensitivity factors	*/
 
 
 
 enum lsm9ds1_axis {
-	X_AXIS,
-	Y_AXIS,
-	Z_AXIS,
-	ALL_AXIS // ALL_AXES
+	X_AXIS,	/**<	enum axis	*/
+	Y_AXIS,	/**<	enum axis	*/
+	Z_AXIS, /**<	enum axis	*/
+	ALL_AXIS /**<	enum all axes	*/
 };
 
-LSM9DS1Class::LSM9DS1Class(TwoWire& wire) :
-  continuousMode(false), _wire(&wire)
-{
-}
+LSM9DS1Class::LSM9DS1Class(TwoWire& wire) : continuousMode(false), _wire(&wire) /**< Constructor, with I2C object */
+{}
 
-LSM9DS1Class::~LSM9DS1Class()
-{
-}
+
+LSM9DS1Class::~LSM9DS1Class() /**< Constructor */
+{}
 
 
 void LSM9DS1Class::init(){
   //  GYRO SETTINGS
-  //  Enabling gyro on all axes
-  settings.gyro.enabled = true;
-  settings.gyro.enableX = true;
-  settings.gyro.enableY = true;
-  settings.gyro.enableZ = true;
-  //  setting scale (245, 500 or 2000 degrees / second)
-  settings.gyro.scale = 2000;
-  //  Setting samplerate for gyro (by using 1-6 corresponding to 14.9, 59.5, 119, 238, 476 or 952 Hz)
-  settings.gyro.sampleRate = 3;
-  //  Setting cutoff frequency (using 0-3 - actual frequency depends on sample rate)
-  settings.gyro.bandwidth = -1;
-  //  Not setting gyro in low power mode
-  settings.gyro.lowPowerEnable = false;
-
-  settings.gyro.HPFEnable = false;
-  //  Gyro HPF cutoff frequency: value between 0-9. Actual value depends on sample rate.
-  settings.gyro.HPFCutoff = 0;
-  //  Setting orientation and whether or not an axis is flipped. This all depends on how the IMU is worn on the persons body
-  settings.gyro.flipX = false;
-	settings.gyro.flipY = false;
-	settings.gyro.flipZ = false;
-	settings.gyro.orientation = 0; //  Meaning initial orientation is expected to the same as the IMU's baseline
-	settings.gyro.latchInterrupt = true;
+  settings.gyro.enabled = true;					/**<	bool used to indicate if Gyroscope is enabled		*/
+  settings.gyro.enableX = true;					/**<	bool used to indicate if axis is enabled		*/
+  settings.gyro.enableY = true;					/**<	bool used to indicate if axis is enabled		*/
+  settings.gyro.enableZ = true;					/**<	bool used to indicate if axis is enabled		*/
+  settings.gyro.scale = 2000;						/**<  setting scale (245, 500 or 2000 degrees / second)*/
+  settings.gyro.sampleRate = 3;					/**<  Setting samplerate for gyro (by using 1-6 corresponding to 14.9, 59.5, 119, 238, 476 or 952 Hz)*/
+  settings.gyro.bandwidth = -1;					/**<  Setting cutoff frequency (using 0-3 - actual frequency depends on sample rate)		*/
+  settings.gyro.lowPowerEnable = false;	/**<  Low power mode active: true / false 		*/
+  settings.gyro.HPFEnable = false;			/**<	Highpass filter enabled: true / false		*/
+  settings.gyro.HPFCutoff = 0;					/**<  Gyro high pass filter cutoff frequency: value between 0-9. Actual value depends on sample rate.		*/
+  settings.gyro.flipX = false;					/**<  Is X axis is flipped. Depends on how the IMU is worn on the persons body: boolean		*/
+	settings.gyro.flipY = false;					/**<  Is Y axis is flipped. Depends on how the IMU is worn on the persons body: boolean		*/
+	settings.gyro.flipZ = false;					/**<  Is Z axis is flipped. Depends on how the IMU is worn on the persons body: boolean		*/
+	settings.gyro.orientation = 0;				/**<  Meaning initial orientation is expected to the same as the IMU's baseline		*/
+	settings.gyro.latchInterrupt = true;	/**<	Is Gyroscope prepped for activating interrupt.		*/
 
 
   //  ACC SETTINGS
-  //  Enabling acc on all axes
-  settings.accel.enabled = true;
-  settings.accel.enableX = true;
-  settings.accel.enableY = true;
-  settings.accel.enableZ = true;
-  //  setting scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)
-  settings.accel.scale = 2;
-  //  Setting samplerate (by using 1-6 corresponding to 10, 50, 119, 238, 476 or 952 Hz)
-  settings.accel.sampleRate = 1;
-  //  Setting cutoff frequency (using 0-3 - actual frequency depends on sample rate)
-  settings.accel.bandwidth = -1;
-
-  settings.accel.highResEnable = false;
-  //  setting high resolution bandwith (usint 0-3. setting ODR/50, ODR/9, ODR/100, ODR/400 )
-  settings.accel.highResBandwidth = 0;
+  settings.accel.enabled = true;				/**<	bool used to indicate if Accelerometer is enabled	*/
+  settings.accel.enableX = true;				/**<	bool used to indicate if axis is enabled		*/
+  settings.accel.enableY = true;				/**<	bool used to indicate if axis is enabled		*/
+  settings.accel.enableZ = true;				/**<	bool used to indicate if axis is enabled		*/
+  settings.accel.scale = 2;							/**<	setting scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)		*/
+  settings.accel.sampleRate = 1;				/**<	Setting samplerate (by using 1-6 corresponding to 10, 50, 119, 238, 476 or 952 Hz)		*/
+  settings.accel.bandwidth = -1;				/**<	Setting cutoff frequency (using 0-3 - actual frequency depends on sample rate)		*/
+  settings.accel.highResEnable = false;	/**<	High resolution enabled: boolean		*/
+  settings.accel.highResBandwidth = 0;	/**<	Setting high resolution bandwith (usint 0-3. setting ODR/50, ODR/9, ODR/100, ODR/400 )		*/
 
 
   //  MAG SETTINGS
-  //  Enabling mag on all axes
-  settings.mag.enabled = true;
-  //  setting scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)
-  settings.mag.scale = 1;
-  //  Setting samplerate (by using 1-6 corresponding to 0.625, 1.25, 2.5, 5, 10, 20, 40, 80 Hz)
-  settings.mag.sampleRate = 8;
-
-  settings.mag.tempCompensationEnable = true;
-  //  Performance of magnetometer (using 0-3, designating: low power mode, medium performance, high performance, ultra high performance )
-  settings.mag.XYPerformance = 1;
+  settings.mag.enabled = true;		  					/**<	Enabling mag on all axes		*/
+  settings.mag.scale = 1;											/**<	setting scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)		*/
+  settings.mag.sampleRate = 8;								/**<	Setting samplerate (by using 1-6 corresponding to 0.625, 1.25, 2.5, 5, 10, 20, 40, 80 Hz)		*/
+  settings.mag.tempCompensationEnable = true;	/**<	Compensate for temperature.		*/
+  settings.mag.XYPerformance = 1;							/**<	Performance of magnetometer (using 0-3, designating: low power mode, medium performance, high performance, ultra high performance )		*/
   settings.mag.ZPerformance = 1;
-  //  Not setting mag in low power mode
-  settings.mag.lowPowerEnable = false;
-  //  Setting operation mode, (using 00, 01, 11 and 10 corresponding to: continuous conversion, single conversion and power down)
-  settings.mag.operatingMode = 00;
+  settings.mag.lowPowerEnable = false;				/**<	Low power mode: boolean		*/
+  settings.mag.operatingMode = 00;						/**<	Setting operation mode, (using 00, 01, 11 and 10 corresponding to: continuous conversion, single conversion and power down)		*/
 
 
   //  TEMP SETTINGS
-  //  Enabling temp - for use in correcting bias
-  settings.temp.enabled = true;
+  settings.temp.enabled = true;					/**<  Enabling temp - for use in correcting bias		*/
   for (int i = 0; i < 3; i++) {
     gBias[i] = 0;
     aBias[i] = 0;
@@ -133,7 +109,7 @@ void LSM9DS1Class::init(){
     mBiasRaw[i] = 0;
   }
 
-  settings.accel._autoCalc = true;
+  settings.accel._autoCalc = true;			/**<	Setting whether bias should be corrected used offset calculations	*/
 
 }
 
@@ -569,12 +545,6 @@ void LSM9DS1Class::setFIFO(fifoMode_type fifoMode, uint8_t fifoThs)
 
 void LSM9DS1Class::calibrate(bool autoCalc)
 {
-	Serial.println("In Calibrate() now");
-
-	Serial.printf("ax bias before:\t%d\n", aBiasRaw[0] );
-  Serial.printf("ay bias before:\t%d\n", aBiasRaw[1] );
-  Serial.printf("az bias before:\t%d\n", aBiasRaw[2] );
-
 	uint8_t samples = 0;
 	int ii;
 	int32_t aBiasRawTemp[3] = {0, 0, 0};
@@ -583,14 +553,14 @@ void LSM9DS1Class::calibrate(bool autoCalc)
 	// Turn on FIFO and set threshold to 32 samples
 	enableFIFO(true);
 	setFIFO(FIFO_THS, 0x1F);
-	Serial.println("Reading samples");
+	// Serial.println("Reading samples");
 	while (samples < 0x1F)
 	{
 
 		samples = (readRegister(LSM9DS1_ADDRESS, (FIFO_SRC) & 0x3F));// Read number of stored samples
 		// samples = (readRegister(LSM9DS1_ADDRESS, (0x2F) & 0x3F));// Read number of stored samples
 	}
-	Serial.println("Reading samples DONE");
+	// Serial.println("Reading samples DONE");
 	for(ii = 0; ii < samples ; ii++)
 	{	// Read the gyro data stored in the FIFO
 		// Serial.println("Reading Gyro");
@@ -619,12 +589,7 @@ void LSM9DS1Class::calibrate(bool autoCalc)
 
 	// if (autoCalc) _autoCalc = true;
 	if (autoCalc) settings.accel._autoCalc = true;
-
- Serial.printf("ax bias after:\t%d\n", aBiasRaw[0] );
- Serial.printf("ay bias after:\t%d\n", aBiasRaw[1] );
- Serial.printf("az bias after:\t%d\n", aBiasRaw[2] );
-
-
+	Serial.println("Calibration done!");
 }
 
 
