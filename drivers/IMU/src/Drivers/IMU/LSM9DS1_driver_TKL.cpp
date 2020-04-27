@@ -1,4 +1,18 @@
 
+/**
+  *
+  *
+  *	@file:		LSM9DS1_driver_TKL.cpp
+  *	@date:		26-03-2020 09:32:41
+  *	@author:	Tonni Lutze
+  *
+  *	@brief    Driver for the LSM9DS1 IMU on Arduino Nano 33 BLE / Sense
+  *
+  *	
+  *
+  *
+**/
+
 
 #include "LSM9DS1_driver_TKL.h"
 

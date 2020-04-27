@@ -8,7 +8,7 @@
   *
   *	@brief    Driver for the LSM9DS1 IMU on Arduino Nano 33 BLE / Sense
   *
-  *	Description here
+  *	
   *
   *
 **/
