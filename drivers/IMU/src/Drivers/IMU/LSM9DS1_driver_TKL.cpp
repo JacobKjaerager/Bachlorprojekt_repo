@@ -8,7 +8,7 @@
   *
   *	@brief    Driver for the LSM9DS1 IMU on Arduino Nano 33 BLE / Sense
   *
-  *	
+  *
   *
   *
 **/
@@ -76,9 +76,9 @@ void LSM9DS1Class::init(){
   settings.gyro.enableX = true;					/**<	bool used to indicate if axis is enabled		*/
   settings.gyro.enableY = true;					/**<	bool used to indicate if axis is enabled		*/
   settings.gyro.enableZ = true;					/**<	bool used to indicate if axis is enabled		*/
-  settings.gyro.scale = 2000;						/**<  setting scale (245, 500 or 2000 degrees / second)*/
-  settings.gyro.sampleRate = 3;					/**<  Setting samplerate for gyro (by using 1-6 corresponding to 14.9, 59.5, 119, 238, 476 or 952 Hz)*/
-  settings.gyro.bandwidth = -1;					/**<  Setting cutoff frequency (using 0-3 - actual frequency depends on sample rate)		*/
+  settings.gyro.scale = 2000;						/**<  Scale (245, 500 or 2000 degrees / second)*/
+  settings.gyro.sampleRate = 3;					/**<  Samplerate for gyro (by using 1-6 corresponding to 14.9, 59.5, 119, 238, 476 or 952 Hz)*/
+  settings.gyro.bandwidth = -1;					/**<  Cutoff frequency (using 0-3 - actual frequency depends on sample rate)		*/
   settings.gyro.lowPowerEnable = false;	/**<  Low power mode active: true / false 		*/
   settings.gyro.HPFEnable = false;			/**<	Highpass filter enabled: true / false		*/
   settings.gyro.HPFCutoff = 0;					/**<  Gyro high pass filter cutoff frequency: value between 0-9. Actual value depends on sample rate.		*/
@@ -94,22 +94,22 @@ void LSM9DS1Class::init(){
   settings.accel.enableX = true;				/**<	bool used to indicate if axis is enabled		*/
   settings.accel.enableY = true;				/**<	bool used to indicate if axis is enabled		*/
   settings.accel.enableZ = true;				/**<	bool used to indicate if axis is enabled		*/
-  settings.accel.scale = 2;							/**<	setting scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)		*/
-  settings.accel.sampleRate = 1;				/**<	Setting samplerate (by using 1-6 corresponding to 10, 50, 119, 238, 476 or 952 Hz)		*/
-  settings.accel.bandwidth = -1;				/**<	Setting cutoff frequency (using 0-3 - actual frequency depends on sample rate)		*/
+  settings.accel.scale = 2;							/**<	Scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)		*/
+  settings.accel.sampleRate = 1;				/**<	Samplerate ( using 1-6 corresponding to 10, 50, 119, 238, 476 or 952 Hz)		*/
+  settings.accel.bandwidth = -1;				/**<	Cutoff frequency (using 0-3 - actual frequency depends on sample rate)		*/
   settings.accel.highResEnable = false;	/**<	High resolution enabled: boolean		*/
-  settings.accel.highResBandwidth = 0;	/**<	Setting high resolution bandwith (usint 0-3. setting ODR/50, ODR/9, ODR/100, ODR/400 )		*/
+  settings.accel.highResBandwidth = 0;	/**<	High resolution bandwith (using 0-3. setting ODR/50, ODR/9, ODR/100, ODR/400 )		*/
 
 
   //  MAG SETTINGS
   settings.mag.enabled = true;		  					/**<	Enabling mag on all axes		*/
-  settings.mag.scale = 1;											/**<	setting scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)		*/
-  settings.mag.sampleRate = 8;								/**<	Setting samplerate (by using 1-6 corresponding to 0.625, 1.25, 2.5, 5, 10, 20, 40, 80 Hz)		*/
+  settings.mag.scale = 1;											/**<	Scale (2, 4, 8 or 16 g's ) (Lower is finer resolution)		*/
+  settings.mag.sampleRate = 8;								/**<	Samplerate ( using 1-6 corresponding to 0.625, 1.25, 2.5, 5, 10, 20, 40, 80 Hz)		*/
   settings.mag.tempCompensationEnable = true;	/**<	Compensate for temperature.		*/
   settings.mag.XYPerformance = 1;							/**<	Performance of magnetometer (using 0-3, designating: low power mode, medium performance, high performance, ultra high performance )		*/
   settings.mag.ZPerformance = 1;
   settings.mag.lowPowerEnable = false;				/**<	Low power mode: boolean		*/
-  settings.mag.operatingMode = 00;						/**<	Setting operation mode, (using 00, 01, 11 and 10 corresponding to: continuous conversion, single conversion and power down)		*/
+  settings.mag.operatingMode = 00;						/**<	Operation mode, (using 00, 01, 11 and 10 corresponding to: continuous conversion, single conversion and power down)		*/
 
 
   //  TEMP SETTINGS
