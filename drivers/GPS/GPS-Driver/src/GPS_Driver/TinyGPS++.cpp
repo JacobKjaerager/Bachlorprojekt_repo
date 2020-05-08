@@ -31,8 +31,40 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _GPGGAterm   "GPGGA"
 #define _GNRMCterm   "GNRMC"
 #define _GNGGAterm   "GNGGA"
+
+
+/***************************************************************************/
+/*************************  ADDED by ToKeLu  *******************************/
+/***************************************************************************/
 #define _GPGSVterm   "GPGSV"
 #define _GNGSVterm   "GNGSV"
+uint16_t DetailedSateliteData::Elevation(){
+  updated = false;
+  uint16_t ret = elevation; // (elevation > 90 || elevation <= 0) ? 999 : elevation;
+  return ret;
+}
+
+uint16_t DetailedSateliteData::Azimuth(){
+  updated = false;
+  uint16_t ret = azimuth; //(azimuth > 360 || azimuth <= 0) ? 999 : azimuth;
+  return ret;
+}
+
+void DetailedSateliteData::setElevation(const char *term){ newElevation = atoi(term); }
+void DetailedSateliteData::setAzimuth(const char *term){ newAzimuth = atoi(term); }
+
+void DetailedSateliteData::commit()
+{
+
+   elevation = newElevation;
+   azimuth = newAzimuth;
+   lastCommitTime = millis();
+   valid = updated = true;
+}
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+
 
 TinyGPSPlus::TinyGPSPlus()
   :  parity(0)
@@ -257,37 +289,17 @@ bool TinyGPSPlus::endOfTermHandler()
     case COMBINE(GPS_SENTENCE_GPGGA, 5):
       location.rawNewLngData.negative = term[0] == 'W';
       break;
+/*************************  ADDED by ToKeLu  *******************************/
     case COMBINE(GPS_SENTENCE_GPGSV, 5):  //  Elevation in degrees
       // if ( COMBINE(GPS_SENTENCE_GPGSV, 2) == 1)
       {
-
-
-        // Serial.print("Term: Elevation pre set: ");
-        // Serial.println(details.elevation );
-        //
         details.setElevation(term);
-        // details.newElevation = *term;
-        //
-        // Serial.print("Term: Elevation post set: ");
-        // Serial.println(details.elevation );
       }
-
       break;
-
     case COMBINE(GPS_SENTENCE_GPGSV, 6):  //  Azimuth in degrees
-
-    // Serial.print("Raw Term: ");
-    // Serial.println(term );
-    // Serial.println(*term );
-    //   Serial.print("Term: Azimuth pre set: ");
-    //   Serial.println(details.azimuth );
       details.setAzimuth(term);
-      // details.newAzimuth = *term;
-
-      // Serial.print("Term: Azimuth post set: ");
-      // Serial.println(details.azimuth );
       break;
-
+/*************************  ADDED by ToKeLu  *******************************/
     case COMBINE(GPS_SENTENCE_GPRMC, 7): // Speed (GPRMC)
       speed.set(term);
       break;
@@ -539,48 +551,3 @@ void TinyGPSPlus::insertCustom(TinyGPSCustom *pElt, const char *sentenceName, in
    pElt->next = *ppelt;
    *ppelt = pElt;
 }
-
-
-
-/***************************************************************************/
-/*************************  ADDED by ToKeLu  *******************************/
-/***************************************************************************/
-
-
-
-
-uint16_t DetailedSateliteData::Elevation(){
-  updated = false;
-  uint16_t ret = elevation; // (elevation > 90 || elevation <= 0) ? 999 : elevation;
-  return ret;
-}
-
-uint16_t DetailedSateliteData::Azimuth(){
-  updated = false;
-  uint16_t ret = azimuth; //(azimuth > 360 || azimuth <= 0) ? 999 : azimuth;
-  return ret;
-}
-
-void DetailedSateliteData::setElevation(const char *term){
-  newElevation = atoi(term);
-}
-void DetailedSateliteData::setAzimuth(const char *term){
-  newAzimuth = atoi(term);
-}
-
-
-void DetailedSateliteData::commit()
-{
-
-   elevation = newElevation;
-   azimuth = newAzimuth;
-   lastCommitTime = millis();
-   valid = updated = true;
-}
-
-
-
-
-/***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/

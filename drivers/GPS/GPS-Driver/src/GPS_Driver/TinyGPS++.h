@@ -1,25 +1,31 @@
-/*
-TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
-Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
-Suggestion to add satellites, courseTo(), and cardinal() by Matt Monson.
-Location precision improvements suggested by Wayne Holder.
-Copyright (C) 2008-2013 Mikal Hart
-All rights reserved.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+/**
+* @file:		TinyGPS++.h
+* @author:	Matt Monson
+* @brief    TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
+*
+* TinyGPS++ - a small GPS library for Arduino providing universal NMEA parsing
+* Based on work by and "distanceBetween" and "courseTo" courtesy of Maarten Lamers.
+* Suggestion to add satellites, courseTo(), and cardinal() by Matt Monson.
+* Location precision improvements suggested by Wayne Holder.
+* Copyright (C) 2008-2013 Mikal Hart
+* All rights reserved.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+**/
 
 #ifndef __TinyGPSPlus_h
 #define __TinyGPSPlus_h
@@ -48,9 +54,43 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 struct DetailedSateliteData{
   friend class TinyGPSPlus;
 public:
+
+  /**
+  * @brief  isValid(): Checks telegrams checksum to validate data
+  *
+  * @param None.
+  * @return bool
+  **/
   bool isValid()    const {return valid;}
+
+  /**
+  * @brief  isUpdated(): checks data to see if there is new telegrams.
+  *
+  * @param None.
+  * @return bool
+  **/
   bool isUpdated()  const {return updated;}
+
+  /**
+  * @brief  Elevation(): Locates and stores elevation data from telegrams
+  *
+  * @param None.
+  * @return uint16_t elevation above sealevel in meters
+  **/
   uint16_t Elevation();
+
+
+  /**
+  * @brief  Azimuth(): Locates and stores Azimuth data from telegrams
+  *
+  *   Calls the Drivers initiation method for the IMU, which sets up the default
+  *   values for the components sampletates.
+  *   After initialization the settings are printed (this is mainly for testing and debugging)
+  *
+  * @param None.
+  * @return uint16_t Azimuth in degrees
+  *
+  **/
   uint16_t Azimuth();
 
   DetailedSateliteData() : valid(false), updated(false) {}
@@ -61,11 +101,32 @@ private:
   uint16_t azimuth, newAzimuth;
   uint32_t lastCommitTime;
 
+  /**
+  * @brief  commit(): commits recorded data from a telegram into the data object.
+  *
+  * @param None.
+  * @return void
+  *
+  **/
   void commit();
+
+  /**
+  * @brief  setElevation(): Stores elevation data from telegram in data object
+  *
+  * @param const char *term
+  * @return void
+  *
+  **/
   void setElevation(const char *term);
+
+  /**
+  * @brief  setAzimuth(): Stores Azimuth data from telegram in data object
+  *
+  * @param const char *term
+  * @return void
+  *
+  **/
   void setAzimuth(const char *term);
-
-
 };
 
 
