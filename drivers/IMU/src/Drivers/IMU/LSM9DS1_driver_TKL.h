@@ -8,17 +8,13 @@
   *
   *	@brief    Driver for the LSM9DS1 IMU on Arduino Nano 33 BLE / Sense
   *
-  *	
+  *
   *
   *
 **/
 
 #include <Wire.h>
-
 #include "LSM9DS1_Types.h"
-
-
-
 
 class LSM9DS1Class {
   public:
@@ -32,7 +28,6 @@ class LSM9DS1Class {
     int16_t gx, gy, gz;   /**<  readouts from gyroscope x, y, and z axes  */
     int16_t mx, my, mz;   /**<  readouts from magnetometer x, y, and z axes */
     int16_t temperature;  /**<  readouts of chip temperature  */
-
 
     LSM9DS1Class(TwoWire& wire);
     virtual ~LSM9DS1Class();
@@ -455,17 +450,5 @@ class LSM9DS1Class {
 };
 
 extern LSM9DS1Class IMU;
-
-
-
-
-
-
-
-
-
-
-
-
 
 //EOF
