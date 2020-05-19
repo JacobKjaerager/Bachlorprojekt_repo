@@ -1,30 +1,24 @@
 
 
-/*! \brief This is a helper "class" to make the usage of the TinyGPS++ library.
+/*! @brief Helper "class" for TinyGPS++ library.
  *
- *			Description here
+ *			This is a helper "class" to make the usage of the TinyGPS++ library.
  *
- *
- *
- *	Filename:	GPSHelper.h
- *	Path:		./GPS_Driver/
- *	Created:	12-04-2020 10:56:48
- *	Author:		Tonni Lutze
+ *	@file: ./GPS_Driver/GPSHelper.h
+ *	@date: 12-04-2020 10:56:48
+ *	@author: Tonni Lutze
  *
  *	Major change #1:
  */
 
-
 #include "TinyGPS++.h"
 
 
-
 /**
- * \brief Struct containing all the data needed from GPS
+ * @brief Struct containing all the data needed from GPS
  *
- * \param None.
- *
- * \return n/a
+ * @param None.
+ * @return n/a
  */
 struct GPSPackage{
   double    Latitude;     // 4 byte
@@ -43,65 +37,42 @@ struct GPSPackage{
 
 
 /**
- * \brief Initializing GPS Driver
- *        This really just starts the second hardware serial port.
- *        //TODO: enable/disable pin on nano to power on/off the GPS.
- *
- * \param None.
- *
- * \return void
- */
+* @brief Initializing GPS Driver
+*
+*  This really just starts the second hardware serial port.
+*  //TODO: enable/disable pin on nano to power on/off the GPS.
+*
+* @param None.
+* @return void
+*/
 void InitGPS();
 
 /**
- * \brief Function to do a Readout from the GPS.
- *        Do a check with isDataReady() to make sure data is ready before using.
- *
- * \param None.
- *
- * \return GPSPackage
- */
+* @brief Function to do a Readout from the GPS.
+*
+* Do a check with isDataReady() to make sure data is ready before using.
+*
+* @param None.
+* @return GPSPackage
+*/
 GPSPackage ReadGPSData();
 
 /**
- * \brief Function to do a printout to Serial Port of the collected GPS data.
- *        Mainly for testing purposes.
- *
- * \param None.
- *
- * \return void
- */
+* @brief Function to do a printout to Serial Port of the collected GPS data.
+*
+* Mainly for testing purposes.
+*
+* @param None.
+* @return void
+*/
 void PrintGPSData();
 
 /**
- * \brief Very simple function to check if data is ready from GPS.
- *
- * \param None.
- *
- * \return Bool
- */
+* @brief Very simple function to check if data is ready from GPS.
+* @param None.
+* @return Bool
+*/
 bool isDataReady();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //  EOF

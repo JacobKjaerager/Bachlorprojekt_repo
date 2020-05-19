@@ -67,10 +67,14 @@ Brug denne her for at indstille default indstillinger:
 /****************************************************************************/
 /****************************************************************************/
 
+
+
+
 void setup() {
   Serial.begin(9600);
   while (!Serial);
   Serial.println("Started");
+
 
   SetupIMUDefaults();
   StartIMU();

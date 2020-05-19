@@ -1,8 +1,17 @@
 
-
-
-
-
+/**
+  *
+  *
+  *	@file:		SetupIMU.cpp
+  *	@date:		26-03-2020 10:02:21
+  *	@author:	Tonni Lutze
+  *
+  *	@brief    Helperclass for IMU Driver
+  *
+  *
+  *
+  *
+**/
 
 #include "SetupIMU.h"
 #include <Math.h>
@@ -35,42 +44,23 @@ bool IsInFreeFall(){
   return (sqrt(ax_ * ax_ + ay_ * ay_ + az_ * az_) <= freeFallThreshold ? true : false );
 }
 
-
-
-
-/**
- * \brief Sets up the Accelerometer for reading the data from it in the wanted rate etc.
- *
- * \param enableAcc   - Boolean, used to enable or disable the accelerometer. Used for all axes
- * \param scale       - sets the full-scale range of the accelerometer.
-                        Accelerometer scale can be 2, 4, 8, or 16
- * \param samplerate  - sets the output data rate (ODR) of the accelerometer.
-                        ONLY APPLICABLE WHEN THE GYROSCOPE IS DISABLED!
-                        Otherwise accel sample rate = gyro sample rate.
-                        Accelerometer sample rate can be 1-6
- * \param bandwidth   - Sets the anti-aliasing filter bandwidth.
-                        Accelerometer cutoff freqeuncy can be any value between -1 - 3.
-                        -1 = bandwidth determined by sample rate
- *
- * \return void
- */
-void SetupACC(bool enableAcc, uint8_t scale, uint8_t sampleRate, uint8_t bandwidth ){
+void SetupACC(bool enableAcc, uint8_t scale, uint8_t sampleRate, int8_t bandwidth ){
   IMU.settings.accel.enabled = enableAcc;
-  IMU.settings.accel.enableX = enableAcc;
+  IMU.settings.accel.enableX = enableAcc; //  could ve used to disable one axis - but we use them all so...
   IMU.settings.accel.enableY = enableAcc;
   IMU.settings.accel.enableZ = enableAcc;
-  IMU.settings.accel.scale = scale;
-  IMU.settings.accel.sampleRate = sampleRate;
-  IMU.settings.accel.bandwidth = bandwidth;
+  IMU.settings.accel.scale = (( scale == 4 || scale == 8 || scale == 16 ) ? scale : 2);
+  IMU.settings.accel.sampleRate = ((sampleRate >= 1 && sampleRate <= 6) ? sampleRate : 1);
+  IMU.settings.accel.bandwidth = ((bandwidth >= -1 && bandwidth <= 3) ? bandwidth : -1);
   IMU.settings.accel.highResEnable = false;
   IMU.settings.accel.highResBandwidth = 0;
 }
 
-void SetupGyro(bool enableGyr, int scale, uint8_t sampleRate, uint8_t bandwidth, bool lowPowerMode){
+void SetupGyro(bool enableGyr, int scale, uint8_t sampleRate, int8_t bandwidth, bool lowPowerMode){
   IMU.settings.gyro.enabled = enableGyr;
-  IMU.settings.gyro.scale = scale;
-  IMU.settings.gyro.sampleRate = sampleRate;
-  IMU.settings.gyro.bandwidth = bandwidth;
+  IMU.settings.gyro.scale = (( scale == 245 || scale == 500 ) ? scale : 2000);;
+  IMU.settings.gyro.sampleRate = ((sampleRate >= 1 && sampleRate <= 6) ? sampleRate : 1);
+  IMU.settings.gyro.bandwidth = ((bandwidth >= -1 && bandwidth <= 3) ? bandwidth : -1);
   IMU.settings.gyro.lowPowerEnable = lowPowerMode;
   IMU.settings.gyro.HPFEnable = true;
   IMU.settings.gyro.HPFCutoff = 1;
@@ -97,10 +87,6 @@ void SetupIMUDefaults() {
 
   // IMU.calibrate(true);
 }
-
-
-
-
 
 void StartIMU() {
   if (!IMU.begin()) {
@@ -136,8 +122,6 @@ void PrintTest() {
     // readGyro() function. When it exits, it'll update the
     // gx, gy, and gz variables with the most current data.
     IMU.readGyro();
-
-
   }
 
   if ( IMU.accelerationAvailable() ){
@@ -167,7 +151,6 @@ void PrintTest() {
     printAccel(); // Print "A: ax, ay, az"
     printMag();   // Print "M: mx, my, mz"
 
-
     // Print the heading and orientation for fun!
     // Call print attitude. The LSM9DS1's mag x and y
     // axes are opposite to the accelerometer, so my, mx are
@@ -178,7 +161,6 @@ void PrintTest() {
     lastPrint = millis();
   }
 }
-
 
 void printTemp(){
   Serial.print("Temp: ");
@@ -220,7 +202,6 @@ void printAccel(){
   Serial.print(", ");
   Serial.println(IMU.az);
 #endif
-
 }
 
 void printMag(){
@@ -241,11 +222,7 @@ void printMag(){
 #endif
 }
 
-// Calculate pitch, roll, and heading.
-// Pitch/roll calculations take from this app note:
-// http://cache.freescale.com/files/sensors/doc/app_note/AN3461.pdf?fpsp=1
-// Heading calculations taken from this app note:
-// http://www51.honeywell.com/aero/common/documents/myaerospacecatalog-documents/Defense_Brochures-documents/Magnetic__Literature_Application_notes-documents/AN203_Compass_Heading_Using_Magnetometers.pdf
+//
 void printAttitude(float ax, float ay, float az, float mx, float my, float mz){
   float roll = atan2(ay, az);
   float pitch = atan2(-ax, sqrt(ay * ay + az * az));
