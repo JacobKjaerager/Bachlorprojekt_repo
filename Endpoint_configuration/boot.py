@@ -43,21 +43,21 @@ machine.pin_sleep_wakeup(['P13'], machine.WAKEUP_ANY_HIGH, True)
 ##------------------------------------------------------------------------------------------##
 ##------------------------------------------------------------------------------------------##
 
-class  AfdsdUI:
+class  UI:
     def interrupt_handler(self, arg):
         print("Interrupt is called")
         uart1.write("OK")
         print("OK written to Arduino")
-        Afdsd_radio_ctrl().go_to_sleep(3600000)
+        afdsdCtrl2().go_to_sleep(3600000)
 
     def incicate(self, rgbHex):
         rgbled(rgbHex)
 ##-------------------------------Interrupt--------------------------------------------------##
 pin_stop_button = Pin('G17', mode=Pin.IN, pull=Pin.PULL_UP)
-pin_stop_button.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, AfdsdUI().interrupt_handler)
+pin_stop_button.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, UI().interrupt_handler)
 ##------------------------------------------------------------------------------------------##
 
-class Uart_com():
+class Uart_IF():
     def write_ok_to_arduino(self):
         uart1.write("OK")
     def get_gps_buffer(self):
@@ -65,25 +65,31 @@ class Uart_com():
         telegram_splitted_gps_buffer = raw_gps_buffer.split("$") #Telegrams starts with "$"
         return  telegram_splitted_gps_buffer
 
-class Positioning():
-    def get_gps_buffer(self, recursions):
+class GPS_module():
+    def get_current_pos(self, recursions):
         gps_buffer = ""
         default_buffer = ['122637.00', '5610.06764', '5610.06764', '01011.43309', 
                     '01011.43309', '10.00000', '10.00000', '10.00000', '10.00000', 
                     '10.00000', '', '', '', '*65\\r\\n']
 
-        gps_buffer = Uart_com().get_gps_buffer()
+        gps_buffer = Uart_IF().get_gps_buffer()
 
         for i in range(len(gps_buffer)):
-            self.find_telegram(gps_buffer[i].split(","), recursions)
+            gps_buffer, waittime = self.find_telegram(gps_buffer[i].split(","), recursions)
+
+       	    #Conversion from NMES GPGGA version of Latitude degree to Latitude comma coordinate
+       	    lat = float(gps_buffer[2][0:2]) + float(gps_buffer[2][2:len(gps_buffer[2])])/60
+            #Conversion from NMES GPGGA version of Longitude degree to Longitude comma coordinate
+            lon = float(gps_buffer[4][0:3]) + float(gps_buffer[4][3:len(gps_buffer[4])])/60 
+            return lat, lon, waittime
             
         sleep(1) 
         if(gps_buffer == ""):
             print("GPS-module not functional.")
 
         if (recursions == 0):
-            # Default LAT and LON set to 5610.06764, '01011.43309'(At Aldi close to IHA)
             return default_buffer, recursions
+
         new_recursion = recursions - 1
         return self.get_gps_buffer(new_recursion)
 
@@ -95,17 +101,10 @@ class Positioning():
             else:
                 print("Critical data not present in gps_buffer")
 
-    def calculate_pos_to_comma(self, max_recursion):
-        gps_buffer, waittime = self.get_gps_buffer(max_recursion)
-        #Conversion from NMES GPGGA version of Latitude degree to Latitude comma coordinate
-        lat = float(gps_buffer[2][0:2]) + float(gps_buffer[2][2:len(gps_buffer[2])])/60
-        #Conversion from NMES GPGGA version of Longitude degree to Longitude comma coordinate
-        lon = float(gps_buffer[4][0:3]) + float(gps_buffer[4][3:len(gps_buffer[4])])/60 
-        return lat, lon, waittime
 
-class Lora_comm():
+class LoRa_IF():
 
-    def socket_configuration(self):
+    def set_socket_configuration(self):
         s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
         s.setsockopt(socket.SOL_LORA, socket.SO_DR, 0)
         s.setsockopt(socket.SOL_LORA, socket.SO_CONFIRMED, True)
@@ -128,10 +127,17 @@ class Lora_comm():
         lora.nvram_save()
         self.go_to_sleep(3600000)
 
-class Afdsd_radio_ctrl():
-    current_pos = Positioning().calculate_pos_to_comma
-    incicate = AfdsdUI().incicate
-    write_ok_to_arduino = Uart_com().write_ok_to_arduino
+    def send_packet():
+	#Serverside will receive a 12 byte payload on the form
+        #lat = payload[0:3] lon = payload[4:7] , battery = payload[8:11]
+        payload = bytes(struct.pack("fff", lat, lon, batt)) 
+        count = s.send(payload)
+
+class afdsdCtrl2():
+    get_current_pos= GPS_module.get_current_pos
+    incicate = UI().incicate
+    write_ok_to_arduino = Uart_IF().write_ok_to_arduino
+    lora_comm = LoRa_IF()
 
     def go_to_sleep(self, sleeptime):
         while True:
@@ -146,10 +152,10 @@ class Afdsd_radio_ctrl():
     def deepsleep_wakeup_sequence(self, second_to_gps_try):
         lora.nvram_restore()
         self.incicate(red) #Red when package sending is started
-        s = self.socket_configuration()
+        s = self.set_socket_configuration()
 
         ##GPS section##
-        lat, lon, waittime = self.current_pos(second_to_gps_try)
+        lat, lon, waittime = self.get_current_pos(second_to_gps_try)
         print(waittime)
         self.incicate(pink)
         sleep(waittime + 0.1) #0.1 required else too fast for rgbled
@@ -158,10 +164,7 @@ class Afdsd_radio_ctrl():
 
         ##Transmission section##
         self.incicate(blue) #Switching to blue when GPS is done.
-        #Serverside will receive a 12 byte payload on the form
-        # lat = payload[0:3] lon = payload[4:7] , battery = payload[8:11]
-        payload = bytes(struct.pack("fff", lat, lon, batt)) 
-        count = s.send(payload)
+        lora_comm.send_packet()
 
         self.write_ok_to_arduino()
         print("OK written to Ardunio")
@@ -171,9 +174,9 @@ class Afdsd_radio_ctrl():
 
 #Use saved configuration if awoken
 if machine.reset_cause() == machine.DEEPSLEEP_RESET: 
-    Afdsd_radio_ctrl().deepsleep_wakeup_sequence(10) #Input to gps tries 1 second pr try
+    afdsdCtrl2().deepsleep_wakeup_sequence(10) #Input to gps tries 1 second pr try
 else: #Should only run one time, and activates the device up against the join server with the given keys.
     # OTAA is used in this configuration
     dev_eui = lora.mac()
     app_key = binascii.unhexlify('c0f14c7040f7a0b976a61d8569e0e5c4')
-    Lora_comm().join_sequence(dev_eui, app_key)
+    LoRa_IF().join_sequence(dev_eui, app_key)
