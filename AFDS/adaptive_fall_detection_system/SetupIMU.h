@@ -16,7 +16,7 @@
 
 // #include "LSM9DS1_Types.h"
 
-#include "LSM9DS1_driver_TKL.h"
+#include "LSM9DS1_driver.h"
 
 
 /**
