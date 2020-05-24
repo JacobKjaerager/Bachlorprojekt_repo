@@ -39,7 +39,7 @@ batt = adc.channel(attn=1, pin='P16')
 ##----------------------------Wakeup configuration------------------------------------------##
 pin_in = Pin('P13', mode=Pin.IN, pull= Pin.PULL_DOWN)
 machine.pin_sleep_wakeup(['P13'], machine.WAKEUP_ANY_HIGH, True)
-#Wakeup configuration
+
 ##------------------------------------------------------------------------------------------##
 ##------------------------------------------------------------------------------------------##
 
@@ -134,7 +134,7 @@ class LoRa_IF():
         count = s.send(payload)
 
 class afdsdCtrl2():
-    get_current_pos= GPS_module.get_current_pos
+    get_current_pos= GPS_module().get_current_pos
     incicate = UI().incicate
     write_ok_to_arduino = Uart_IF().write_ok_to_arduino
     lora_comm = LoRa_IF()
@@ -159,12 +159,13 @@ class afdsdCtrl2():
         print(waittime)
         self.incicate(pink)
         sleep(waittime + 0.1) #0.1 required else too fast for rgbled
+
         ##Analog readings##
         batt = 4095 #test
 
         ##Transmission section##
         self.incicate(blue) #Switching to blue when GPS is done.
-        lora_comm.send_packet()
+        LoRa_IF().send_packet()
 
         self.write_ok_to_arduino()
         print("OK written to Ardunio")
