@@ -39,18 +39,18 @@ batt = adc.channel(attn=1, pin='P16')
 ##----------------------------Wakeup configuration------------------------------------------##
 pin_in = Pin('P13', mode=Pin.IN, pull= Pin.PULL_DOWN)
 machine.pin_sleep_wakeup(['P13'], machine.WAKEUP_ANY_HIGH, True)
-
+#Wakeup configuration
 ##------------------------------------------------------------------------------------------##
 ##------------------------------------------------------------------------------------------##
 
-class  UI:
+class UI():
     def interrupt_handler(self, arg):
         print("Interrupt is called")
         uart1.write("OK")
         print("OK written to Arduino")
         afdsdCtrl2().go_to_sleep(3600000)
 
-    def incicate(self, rgbHex):
+    def indicate(self, rgbHex):
         rgbled(rgbHex)
 ##-------------------------------Interrupt--------------------------------------------------##
 pin_stop_button = Pin('G17', mode=Pin.IN, pull=Pin.PULL_UP)
@@ -63,47 +63,50 @@ class Uart_IF():
     def get_gps_buffer(self):
         raw_gps_buffer = str(uart2.read())
         telegram_splitted_gps_buffer = raw_gps_buffer.split("$") #Telegrams starts with "$"
-        return  telegram_splitted_gps_buffer
+        return telegram_splitted_gps_buffer
 
 class GPS_module():
     def get_current_pos(self, recursions):
-        gps_buffer = ""
-        default_buffer = ['122637.00', '5610.06764', '5610.06764', '01011.43309', 
-                    '01011.43309', '10.00000', '10.00000', '10.00000', '10.00000', 
-                    '10.00000', '', '', '', '*65\\r\\n']
-
-        gps_buffer = Uart_IF().get_gps_buffer()
-
-        for i in range(len(gps_buffer)):
-            gps_buffer, waittime = self.find_telegram(gps_buffer[i].split(","), recursions)
-
-       	    #Conversion from NMES GPGGA version of Latitude degree to Latitude comma coordinate
-       	    lat = float(gps_buffer[2][0:2]) + float(gps_buffer[2][2:len(gps_buffer[2])])/60
-            #Conversion from NMES GPGGA version of Longitude degree to Longitude comma coordinate
-            lon = float(gps_buffer[4][0:3]) + float(gps_buffer[4][3:len(gps_buffer[4])])/60 
-            return lat, lon, waittime
-            
-        sleep(1) 
-        if(gps_buffer == ""):
-            print("GPS-module not functional.")
-
+        
+        #Base case
         if (recursions == 0):
-            return default_buffer, recursions
+            #Conversion from NMES GPGGA version of Latitude degree to Latitude comma coordinate
+            default_lat = '5610.06764'
+            default_lon = '01011.43309'
+            lat = float(default_lat[0:2]) + float(default_lat[2:len(default_lat)])/60
+            #Conversion from NMES GPGGA version of Longitude degree to Longitude comma coordinate
+            lon = float(default_lon[0:3]) + float(default_lon[3:len(default_lon)])/60 
+            return lat, lon, recursions
 
+        read_uart = Uart_IF().get_gps_buffer
+        gps_buffer = read_uart()
+        splitted_buffer = ""
+        for i in range(len(gps_buffer)):
+            splitted_buffer = gps_buffer[i].split(",")
+            if(splitted_buffer[0] == "GPGGA"):
+                if(splitted_buffer[2] != ''): 
+                    raw_lat = str(splitted_buffer[2])
+                    raw_lon = str(splitted_buffer[4])
+
+                    #Conversion from NMES GPGGA version of Latitude degree to Latitude comma coordinate
+                    lat = float(raw_lat[0:2]) + float(raw_lat[2:len(raw_lat)])/60
+                    #Conversion from NMES GPGGA version of Longitude degree to Longitude comma coordinate
+                    lon = float(raw_lon[0:3]) + float(raw_lon[3:len(raw_lon)])/60 
+                    
+                    return lat, lon, recursions
+                else:
+                    print("Critical data not present in gps_buffer")
+
+        if(splitted_buffer == ""):
+            print("GPS module not functional") 
+            
+        sleep(1) #Sleeps for 1 seconds, then retry to fill up buffer then retries if GPGAA is not present. 
         new_recursion = recursions - 1
-        return self.get_gps_buffer(new_recursion)
-
-    def find_telegram(self, splitted_telegram, recursion_max):
-
-        if(splitted_telegram[0] == "GPGGA"):
-            if(splitted_telegram[2] != ''): #latitude is splitted_telegram[2]  
-                return splitted_telegram, recursion_max 
-            else:
-                print("Critical data not present in gps_buffer")
-
+        return self.get_current_pos(new_recursion)
 
 class LoRa_IF():
-
+    indicate = UI().indicate
+    
     def set_socket_configuration(self):
         s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
         s.setsockopt(socket.SOL_LORA, socket.SO_DR, 0)
@@ -114,64 +117,65 @@ class LoRa_IF():
     def join_sequence(self, dev_eui, app_key):
 
         lora.join(activation=LoRa.OTAA, auth=(dev_eui, app_key), timeout=0, dr=0)  #Join the network
-        self.incicate(red)
+        self.indicate(red)
 
         while not lora.has_joined(): # Loop until joined
             print('Not joined yet...')
-            self.incicate(red)
+            self.indicate(red)
             sleep(0.1)
-            self.incicate(off)
+            self.indicate(off)
             sleep(2)
 
         print('Joined')
         lora.nvram_save()
-        self.go_to_sleep(3600000)
+        afdsdCtrl2().go_to_sleep(3600000)
 
-    def send_packet():
+    def send_packet(self, s, lat, lon, batt) :
 	#Serverside will receive a 12 byte payload on the form
         #lat = payload[0:3] lon = payload[4:7] , battery = payload[8:11]
         payload = bytes(struct.pack("fff", lat, lon, batt)) 
         count = s.send(payload)
+        print('Sent %s bytes' % count)
 
 class afdsdCtrl2():
     get_current_pos= GPS_module().get_current_pos
-    incicate = UI().incicate
+    indicate = UI().indicate
     write_ok_to_arduino = Uart_IF().write_ok_to_arduino
-    lora_comm = LoRa_IF()
+    lora_if = LoRa_IF()
 
     def go_to_sleep(self, sleeptime):
         while True:
-            self.incicate(green)
+            self.indicate(green)
             sleep(0.1)
-            self.incicate(blue)
+            self.indicate(blue)
             sleep(2)
             lora.nvram_save()
-            deepsleep_time = sleeptime 
-            machine.deepsleep(deepsleep_time) #Sleeps for 1 hour
+             
+            machine.deepsleep(sleeptime) #Sleeps for 1 hour
 
     def deepsleep_wakeup_sequence(self, second_to_gps_try):
         lora.nvram_restore()
-        self.incicate(red) #Red when package sending is started
-        s = self.set_socket_configuration()
+        self.indicate(red) #Red when package sending is started
+        s = self.lora_if.set_socket_configuration()
 
         ##GPS section##
         lat, lon, waittime = self.get_current_pos(second_to_gps_try)
         print(waittime)
-        self.incicate(pink)
-        sleep(waittime + 0.1) #0.1 required else too fast for rgbled
+        self.indicate(pink)
+        sleep(0.1 )#float(waittime)) #0.1 required else too fast for rgbled
 
         ##Analog readings##
         batt = 4095 #test
 
         ##Transmission section##
-        self.incicate(blue) #Switching to blue when GPS is done.
-        LoRa_IF().send_packet()
+        self.indicate(blue) #Switching to blue when GPS is done.
+        self.lora_if.send_packet(s, lat, lon, batt)
 
         self.write_ok_to_arduino()
         print("OK written to Ardunio")
         print("{} \n {}".format(lat,lon))
-        print('Sent %s bytes' % count)
-        self.go_to_sleep(3600000)
+        
+        self.go_to_sleep(1000)
 
 #Use saved configuration if awoken
 if machine.reset_cause() == machine.DEEPSLEEP_RESET: 
