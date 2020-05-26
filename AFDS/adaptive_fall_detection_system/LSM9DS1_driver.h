@@ -2,7 +2,7 @@
 /**
   *
   *
-  *	@file:		LSM9DS1_driver_TKL.h
+  *	@file:		LSM9DS1_driver.h
   *	@date:		26-03-2020 09:32:41
   *	@author:	Tonni Lutze
   *

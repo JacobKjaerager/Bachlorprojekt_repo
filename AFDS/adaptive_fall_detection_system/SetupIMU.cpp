@@ -1,7 +1,17 @@
 
-
-
-
+/**
+  *
+  *
+  * @file:    SetupIMU.cpp
+  * @date:    26-03-2020 10:02:21
+  * @author:  Tonni Lutze
+  *
+  * @brief    Helperclass for IMU Driver
+  *
+  *
+  *
+  *
+**/
 
 
 #include "SetupIMU.h"

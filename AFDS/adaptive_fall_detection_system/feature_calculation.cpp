@@ -1,48 +1,22 @@
 /**
   *
   *
-  * @file:    help_functions.cpp
+  * @file:    feature_calculation.cpp
   * @date:    26-03-2020 09:32:41
   * @author:  Morten Sahlertz
   *
-  * @brief    Functions for helping the functionality of the system, most importantly the feature calculation
+  * @brief    Function for calculating the features of the signal
   *
   *
   *
   *
 **/
 
-#include "help_functions.h"
+#include "feature_calculation.h"
 
 #include <Arduino.h>
 
-void push_array(float new_value, float chosen_array[], int array_length) {
-  for (int i = array_length-1; i >= 0; i--) {
-    if (i == 0) {
-      chosen_array[i] = new_value;
-    }
-    else {
-      chosen_array[i] = chosen_array[i-1];
-    }
-  }
-}
-
-void generate_fall_name(char name_array[], int fall_number) {
-  // Generate int to char buffer
-  char int_to_char_str[2];
-  // Read them as int
-  sprintf(int_to_char_str, "%d", fall_number);
-  // Makes sure the first 9 number read 0#, where # is the int number
-  if(fall_number <= 9) {
-    int_to_char_str[1] = int_to_char_str[0];
-    int_to_char_str[0] = '0';
-  }
-  // Generate new array and copy it to the existing array
-  char new_array[] = {'F', 'A', 'L', 'L', int_to_char_str[0], int_to_char_str[1], '.', 'c', 's', 'v',  '\0'};
-  strcpy(name_array, new_array);
-}
-
-void feature_calculation(float calc_feat[], float acc_x_sig[], float acc_y_sig[],
+void feature_calc(float calc_feat[], float acc_x_sig[], float acc_y_sig[],
                          float acc_z_sig[], float gyro_x_sig[], float gyro_y_sig[],
                          float gyro_z_sig[], int signal_len) {
   // Instanciate x-axis variables with first signal value

@@ -70,7 +70,7 @@ void setup();
 *   3: (Save extra amount of signal) When the threshold is exceeded gather an extra amount of IMU data. <br>
 *   4: (Predict fall) Calculate the features and run inferens to predict if a fall has occured. If a fall was predicted, go to 5 if not go to 7. <br>
 *   5: (LoPy communication) Wake up the LoPy, start the audio alarm, save the signal to the microSD card and then wait for reply from the LoPy. <br>
-*   6: (Reset fall variables) If a fall occured, the system sets the wakeup pin low and stops the audio. It then sets the boolean got_data variable to false. <br>
+*   6: (Reset fall variables) After communication with the LoPy the system sets the wakeup pin low and stops the audio. It then sets the boolean got_data variable to false. <br>
 *   7: (Reset variables) Here the system resets the threshold variable, so it is below the defined threshold, and resets the extra signal variable. If a fall was predicted the system starts from 1 and if not the system starts from 2. <br>
 *
 * @return void
